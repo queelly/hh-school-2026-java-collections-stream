@@ -21,69 +21,48 @@ P.P.S Здесь ваши правки необходимо прокоммент
  */
 public class Task9 {
 
-  private long count;
-
   // Костыль, эластик всегда выдает в топе "фальшивую персону".
   // Конвертируем начиная со второй
   public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
+    // на мой взгляд тут этот метод более читаемый, чем size
+    if (persons.isEmpty()) {
       return Collections.emptyList();
     }
-    persons.remove(0);
-    return persons.stream().map(Person::firstName).collect(Collectors.toList());
+    // лучше сделать все операции внутри стрима и не менять исходные данные
+    return persons.stream().skip(1).map(Person::firstName).collect(Collectors.toList());
   }
 
   // Зачем-то нужны различные имена этих же персон (без учета фальшивой разумеется)
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+    // проще просто через конструктор сета собрать новое множество и так без повторений,
+    // код в разы короче без стрима, кстати дистинкт был лишним в старом коде
+    return new HashSet<>(getNames(persons));
   }
 
   // Тут фронтовая логика, делаем за них работу - склеиваем ФИО
   public String convertPersonToString(Person person) {
-    String result = "";
-    if (person.secondName() != null) {
-      result += person.secondName();
-    }
-
-    if (person.firstName() != null) {
-      result += " " + person.firstName();
-    }
-
-    if (person.secondName() != null) {
-      result += " " + person.secondName();
-    }
-    return result;
+    // проще в 1 строку склеить фио через стрим, а так же проверять на null
+    return Stream.of(person.firstName(), person.secondName(), person.middleName()).filter(
+            name -> name != null && !name.isEmpty()).collect(Collectors.joining(" "));
   }
 
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.id())) {
-        map.put(person.id(), convertPersonToString(person));
-      }
-    }
-    return map;
+    // проще так же в 1 строку собрать в мапу коллекцию персонов
+    return persons.stream().collect(
+            Collectors.toMap(Person::id, this::convertPersonToString));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
-    }
-    return has;
+    // асимптотика из квадрата в линию, в одну строку с помощью стрима
+    return persons1.stream().anyMatch(new HashSet<>(persons2)::contains);
   }
 
   // Посчитать число четных чисел
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    // убрал использование поля в классе, еще проще использовать просто count от стрима
+    return numbers.filter(num -> num % 2 == 0).count();
   }
 
   // Загадка - объясните почему assert тут всегда верен
@@ -93,6 +72,14 @@ public class Task9 {
     List<Integer> snapshot = new ArrayList<>(integers);
     Collections.shuffle(integers);
     Set<Integer> set = new HashSet<>(integers);
+    // это верно, рассмотрим вызов метода toString для нашего сета и нашего листа:
+    // в листе строка это просто [1, 2, 3, ... , 10000].
+    // теперь рассмотрим сет - это просто обертка над хэш-таблицей,
+    // в ключах лежат сами элементы, а в значениях заглушки,
+    // а у Integer в диапазоне от 1 до 10000 хэш-кодом выступает само число,
+    // поэтому когда toString будет проходить сет в порядке увеличения ключей,
+    // он будет просто писать числа от 1 до 10000 в порядке увеличения,
+    // поэтому совпадают и вызовы toString, такая вот интересная ситуация
     assert snapshot.toString().equals(set.toString());
   }
 }
