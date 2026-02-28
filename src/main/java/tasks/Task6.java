@@ -20,14 +20,15 @@ public class Task6 {
   public static Set<String> getPersonDescriptions(Collection<Person> persons,
                                                   Map<Integer, Set<Integer>> personAreaIds,
                                                   Collection<Area> areas) {
-    Map<Integer, Person> personMap = persons.stream().collect(
-            Collectors.toMap(Person::id, person -> person));
     Map<Integer, Area> areaMap = areas.stream().collect(
             Collectors.toMap(Area::getId, area -> area));
     Set<String> result = new HashSet<>();
-    for (Integer personId : personAreaIds.keySet()) {
-      for (Integer areaId : personAreaIds.get(personId)) {
-        result.add(personMap.get(personId).firstName() + " - " + areaMap.get(areaId).getName());
+    for (Person person : persons) {
+      for (Integer areaId : personAreaIds.get(person.id())) {
+        Area area = areaMap.get(areaId);
+        if (area != null) {
+          result.add(person.firstName() + " - " + area.getName());
+        }
       }
     }
     return result;

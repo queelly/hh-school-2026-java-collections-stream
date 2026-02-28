@@ -1,10 +1,8 @@
 package tasks;
 
 import common.Person;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+
+import java.util.*;
 
 /*
 Задача 3
@@ -13,9 +11,14 @@ import java.util.List;
 public class Task3 {
 
   public static List<Person> sort(Collection<Person> persons) {
-    return new ArrayList<>(persons).stream().sorted(
-            Comparator.comparing(Person::secondName)
-                    .thenComparing(Person::firstName)
-                    .thenComparing(Person::createdAt)).toList();
+    // действительно, если есть null поля, упадет с ошибкой)
+    return persons.stream()
+            .filter(Objects::nonNull)
+            .sorted(
+                    Comparator.comparing(Person::secondName, Comparator.nullsLast(Comparator.naturalOrder()))
+                            .thenComparing(Person::firstName, Comparator.nullsLast(Comparator.naturalOrder()))
+                            .thenComparing(Person::createdAt, Comparator.nullsLast(Comparator.naturalOrder()))
+            )
+            .toList();
   }
 }

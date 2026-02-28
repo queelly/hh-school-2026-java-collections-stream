@@ -1,14 +1,8 @@
 package tasks;
 
 import common.Person;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -25,9 +19,10 @@ public class Task9 {
   // Конвертируем начиная со второй
   public List<String> getNames(List<Person> persons) {
     // на мой взгляд тут этот метод более читаемый, чем size
-    if (persons.isEmpty()) {
-      return Collections.emptyList();
-    }
+    // действительно, проверка не нужна, т.к. в стриме из-за этого ошибки не вылетит
+//    if (persons.isEmpty()) {
+//      return Collections.emptyList();
+//    }
     // лучше сделать все операции внутри стрима и не менять исходные данные
     return persons.stream().skip(1).map(Person::firstName).collect(Collectors.toList());
   }
@@ -49,8 +44,10 @@ public class Task9 {
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
     // проще так же в 1 строку собрать в мапу коллекцию персонов
+    // поправил, чтобы при неуникальных ключах не падал код
     return persons.stream().collect(
-            Collectors.toMap(Person::id, this::convertPersonToString));
+            Collectors.toMap(Person::id, this::convertPersonToString,
+                    (oldValue, newValue) -> oldValue));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?

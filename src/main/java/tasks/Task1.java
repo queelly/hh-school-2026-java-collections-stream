@@ -5,6 +5,7 @@ import common.PersonService;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
 Задача 1
@@ -26,10 +27,6 @@ public class Task1 {
     Set<Person> persons = personService.findPersons(personIds);
     Map<Integer, Person> personMap = persons.stream().collect(
             Collectors.toMap(Person::id, person -> person));
-    List<Person> returnList = new ArrayList<>();
-    for (Integer id : personIds) {
-      returnList.add(personMap.get(id));
-    }
-    return returnList;
+    return personIds.stream().map(personMap::get).toList();
   }
 }
