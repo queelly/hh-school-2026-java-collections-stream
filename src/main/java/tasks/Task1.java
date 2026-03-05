@@ -2,9 +2,10 @@ package tasks;
 
 import common.Person;
 import common.PersonService;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
 Задача 1
@@ -22,7 +23,10 @@ public class Task1 {
   }
 
   public List<Person> findOrderedPersons(List<Integer> personIds) {
+    // O(n) по памяти и O(n) по времени, т.к. HashMap даёт O(1) по обращению
     Set<Person> persons = personService.findPersons(personIds);
-    return Collections.emptyList();
+    Map<Integer, Person> personMap = persons.stream().collect(
+            Collectors.toMap(Person::id, person -> person));
+    return personIds.stream().map(personMap::get).toList();
   }
 }
